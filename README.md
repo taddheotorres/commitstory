@@ -31,4 +31,4 @@ commitstory/
 
 ## Desarrollo
 
-_WIP — próximamente instrucciones de setup._
+_WIP — proximamente instrucciones de setup y traduccion al ingles._
