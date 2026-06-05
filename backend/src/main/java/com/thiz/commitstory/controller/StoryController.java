@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -33,9 +34,12 @@ public class StoryController {
     }
 
     @GetMapping("/stories")
-    public ResponseEntity<List<StoryResponse>> listStories() {
-        // TODO: support filtering by repoId
-        return ResponseEntity.ok(List.of());
+    public ResponseEntity<List<StoryResponse>> listStories(
+            @RequestParam(required = false) UUID repoId) {
+        if (repoId != null) {
+            return ResponseEntity.ok(storyService.listStories(repoId));
+        }
+        return ResponseEntity.ok(storyService.listAllStories());
     }
 
     @GetMapping("/stories/{id}")

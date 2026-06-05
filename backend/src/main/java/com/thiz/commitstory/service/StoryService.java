@@ -83,6 +83,12 @@ public class StoryService {
                 .toList();
     }
 
+    public List<StoryResponse> listAllStories() {
+        return storyRepository.findAll().stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
     private List<CommitEntry> fetchCommitsInRange(UUID repoId, String startSha, String endSha) {
         var allCommits = commitEntryRepository.findByRepoIdOrderByAuthoredAtAsc(repoId);
         if (startSha == null && endSha == null) {
