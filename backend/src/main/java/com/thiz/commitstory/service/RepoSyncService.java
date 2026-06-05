@@ -27,6 +27,7 @@ import java.util.List;
 public class RepoSyncService {
 
     private final CommitEntryRepository commitEntryRepository;
+    private final RemoteSyncService remoteSyncService;
 
     @Transactional
     public SyncResponse sync(GitRepo repo) {
@@ -82,8 +83,19 @@ public class RepoSyncService {
     }
 
     private SyncResponse syncFromRemote(GitRepo repo) {
-        // TODO: implement GitHub/GitLab API sync
-        return new SyncResponse(0, "Remote sync not yet implemented for: " + repo.getRemoteUrl());
+        var imported = switch (repo.getProvider()) {
+            case GITHUB -> remoteSyncService.syncFromGitHub(repo);
+            case GITLAB -> syncFromGitLab(repo);
+            case NONE -> throw new IllegalArgumentException(
+                    "Repo provider not specified for remote URL: " + repo.getRemoteUrl());
+        };
+
+        return new SyncResponse(imported,
+                "Imported %d commits from %s".formatted(imported, repo.getRemoteUrl()));
+    }
+
+    private int syncFromGitLab(GitRepo repo) {
+        throw new IllegalArgumentException("GitLab sync not yet implemented: " + repo.getRemoteUrl());
     }
 
     private String toJsonFileList(Path repoPath, RevCommit commit) {
