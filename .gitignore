@@ -15,8 +15,7 @@ frontend/.angular/
 docker/.env
 
 # IDE
-.idea/workspace.xml
-.idea/usage.statistics.xml
+.idea/
 *.iml
 
 # OS
