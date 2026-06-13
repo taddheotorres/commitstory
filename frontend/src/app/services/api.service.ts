@@ -9,7 +9,7 @@ import { SyncResponse } from '../models/sync.model';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  private base = 'http://localhost:8080/api';
+  private base = '/api';
 
   constructor(private http: HttpClient) {}
 
