@@ -73,20 +73,30 @@ export class ReposComponent implements OnInit {
 
   ngOnInit() { this.loadRepos(); }
 
+  private onError(e: unknown) {
+    console.error('API error:', e);
+  }
+
   loadRepos() {
     this.loading = true;
-    this.api.repos().subscribe((r: GitRepo[]) => { this.repos = r; this.loading = false; });
+    this.api.repos().subscribe({
+      next: (r: GitRepo[]) => { this.repos = r; this.loading = false; },
+      error: (e: unknown) => { this.onError(e); this.loading = false; }
+    });
   }
 
   addRepo() {
     if (!this.newRepo.name) return;
-    this.api.createRepo(this.newRepo).subscribe(() => {
-      this.newRepo = { name: '', localPath: '', remoteUrl: '', provider: 'NONE' };
-      this.loadRepos();
+    this.api.createRepo(this.newRepo).subscribe({
+      next: () => {
+        this.newRepo = { name: '', localPath: '', remoteUrl: '', provider: 'NONE' };
+        this.loadRepos();
+      },
+      error: this.onError
     });
   }
 
   deleteRepo(id: string) {
-    this.api.deleteRepo(id).subscribe(() => this.loadRepos());
+    this.api.deleteRepo(id).subscribe({ next: () => this.loadRepos(), error: this.onError });
   }
 }

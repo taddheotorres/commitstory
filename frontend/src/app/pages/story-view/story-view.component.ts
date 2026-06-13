@@ -32,9 +32,12 @@ export class StoryViewComponent implements OnInit {
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id')!;
-    this.api.getStory(id).subscribe((s: Story) => {
-      this.story = s;
-      this.html = this.render(s.content);
+    this.api.getStory(id).subscribe({
+      next: (s: Story) => {
+        this.story = s;
+        this.html = this.render(s.content);
+      },
+      error: (e: unknown) => console.error('API error:', e)
     });
   }
 

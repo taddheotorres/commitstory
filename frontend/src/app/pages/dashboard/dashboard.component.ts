@@ -25,8 +25,8 @@ import { Story } from '../../models/story.model';
         <div class="stat-card"><span class="stat-num">{{ summary.totalCommits }}</span><span class="stat-label">Commits</span></div>
         <div class="stat-card"><span class="stat-num">{{ summary.totalAuthors }}</span><span class="stat-label">Authors</span></div>
         <div class="stat-card"><span class="stat-num">{{ summary.totalFilesChanged }}</span><span class="stat-label">Files</span></div>
-        <div class="stat-card"><span class="stat-num">{{ summary.firstCommit }}</span><span class="stat-label">From</span></div>
-        <div class="stat-card"><span class="stat-num">{{ summary.lastCommit }}</span><span class="stat-label">To</span></div>
+        <div class="stat-card"><span class="stat-num">{{ summary.firstCommit || '—' }}</span><span class="stat-label">From</span></div>
+        <div class="stat-card"><span class="stat-num">{{ summary.lastCommit || '—' }}</span><span class="stat-label">To</span></div>
       </div>
 
       <div class="grid-2col">
@@ -161,29 +161,42 @@ export class DashboardComponent implements OnInit {
     this.load();
   }
 
+  private onError(e: unknown) {
+    console.error('API error:', e);
+  }
+
   load() {
-    this.api.getRepo(this.rid).subscribe((r: GitRepo) => this.repo = r);
-    this.api.analyticsSummary(this.rid).subscribe((s: AnalyticsSummary) => this.summary = s);
-    this.api.analyticsTimeline(this.rid).subscribe((t: TimelinePoint[]) => this.timeline = t);
-    this.api.analyticsActivityHour(this.rid).subscribe((a: ActivityDistribution[]) => this.activityHour = a);
-    this.api.analyticsActivityDay(this.rid).subscribe((a: ActivityDistribution[]) => this.activityDay = a);
-    this.api.stories(this.rid).subscribe((s: Story[]) => this.stories = s);
+    this.api.getRepo(this.rid).subscribe({ next: (r: GitRepo) => this.repo = r, error: this.onError });
+    this.api.analyticsSummary(this.rid).subscribe({ next: (s: AnalyticsSummary) => this.summary = s, error: this.onError });
+    this.api.analyticsTimeline(this.rid).subscribe({ next: (t: TimelinePoint[]) => this.timeline = t, error: this.onError });
+    this.api.analyticsActivityHour(this.rid).subscribe({ next: (a: ActivityDistribution[]) => this.activityHour = a, error: this.onError });
+    this.api.analyticsActivityDay(this.rid).subscribe({ next: (a: ActivityDistribution[]) => this.activityDay = a, error: this.onError });
+    this.api.stories(this.rid).subscribe({ next: (s: Story[]) => this.stories = s, error: this.onError });
   }
 
   sync() {
     this.syncing = true;
-    this.api.syncRepo(this.rid).subscribe((r: { message: string }) => {
-      this.syncMsg = r.message;
-      this.syncing = false;
-      this.load();
+    this.api.syncRepo(this.rid).subscribe({
+      next: (r: { message: string }) => {
+        this.syncMsg = r.message;
+        this.syncing = false;
+        this.load();
+      },
+      error: (e: unknown) => {
+        this.onError(e);
+        this.syncing = false;
+      }
     });
   }
 
   genStory() {
     this.api.createStory(this.rid, { mode: this.storyMode, title: this.storyTitle || undefined })
-      .subscribe(() => {
-        this.storyTitle = '';
-        this.api.stories(this.rid).subscribe((s: Story[]) => this.stories = s);
+      .subscribe({
+        next: () => {
+          this.storyTitle = '';
+          this.api.stories(this.rid).subscribe({ next: (s: Story[]) => this.stories = s, error: this.onError });
+        },
+        error: this.onError
       });
   }
 

@@ -82,8 +82,9 @@ class AnalyticsServiceTest {
         when(commitEntryRepository.findByRepoIdOrderByAuthoredAtAsc(repoId)).thenReturn(List.of(c1, c2, c3));
         var a = analyticsService.activityByHour(repoId);
         assertEquals(24, a.size());
-        assertEquals(1, a.get(10).commitCount());  // 10h
-        assertEquals(2, a.get(14).commitCount());  // 14h+16h
+        assertEquals(1, a.get(10).commitCount());  // 10h (c1)
+        assertEquals(1, a.get(14).commitCount());  // 14h (c2)
+        assertEquals(1, a.get(16).commitCount());  // 16h (c3)
     }
 
     @Test
