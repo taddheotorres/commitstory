@@ -26,8 +26,9 @@ public class SpaConfig implements WebMvcConfigurer {
                 @Override
                 public Resource resolveResource(HttpServletRequest request, String requestPath,
                         List<? extends Resource> locations, ResourceResolverChain chain) {
-                    // Don't interfere with API routes
-                    if (requestPath.startsWith("api/")) {
+                    // Only handle paths without dots (non-file paths)
+                    // and that don't start with /api/
+                    if (requestPath.contains(".") || requestPath.startsWith("api/")) {
                         return chain.resolveResource(request, requestPath, locations);
                     }
                     
