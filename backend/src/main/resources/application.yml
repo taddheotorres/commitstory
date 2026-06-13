@@ -45,10 +45,10 @@ spring:
       on-profile: prod
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/commitstory
+    url: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}
     driver-class-name: org.postgresql.Driver
-    username: commitstory
-    password: ${DB_PASSWORD}
+    username: ${PGUSER}
+    password: ${PGPASSWORD}
 
   jpa:
     properties:
