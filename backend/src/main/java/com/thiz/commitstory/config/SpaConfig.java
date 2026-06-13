@@ -6,8 +6,12 @@ import org.springframework.core.io.Resource;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.resource.PathResourceResolver;
+import org.springframework.web.servlet.resource.ResourceResolver;
+import org.springframework.web.servlet.resource.ResourceResolverChain;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.List;
 
 @Configuration
 public class SpaConfig implements WebMvcConfigurer {
@@ -18,15 +22,34 @@ public class SpaConfig implements WebMvcConfigurer {
             .addResourceHandler("/**")
             .addResourceLocations("classpath:/static/")
             .resourceChain(false)
-            .addResolver(new PathResourceResolver() {
+            .addResolver(new ResourceResolver() {
                 @Override
-                protected Resource getResource(String resourcePath, Resource location) throws IOException {
-                    Resource resource = location.createRelative(resourcePath);
-                    if (resource.exists() && resource.isReadable()) {
+                public Resource resolveResource(HttpServletRequest request, String requestPath,
+                        List<? extends Resource> locations, ResourceResolverChain chain) {
+                    // Don't interfere with API routes
+                    if (requestPath.startsWith("api/")) {
+                        return chain.resolveResource(request, requestPath, locations);
+                    }
+                    
+                    Resource resource = chain.resolveResource(request, requestPath, locations);
+                    if (resource != null) {
                         return resource;
                     }
-                    return new ClassPathResource("/static/index.html");
+                    
+                    // Fall back to index.html for SPA routes
+                    try {
+                        return new ClassPathResource("/static/index.html");
+                    } catch (Exception e) {
+                        return null;
+                    }
+                }
+
+                @Override
+                public String resolveUrlPath(String resourcePath, List<? extends Resource> locations,
+                        ResourceResolverChain chain) {
+                    return chain.resolveUrlPath(resourcePath, locations);
                 }
             });
     }
 }
+
