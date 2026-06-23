@@ -8,6 +8,12 @@ import com.thiz.commitstory.repository.CommitEntryRepository;
 import com.thiz.commitstory.service.RepoService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -28,6 +34,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/repos")
 @RequiredArgsConstructor
+@Tag(name = "Repositories", description = "Manage Git repositories")
 public class RepoController {
 
     private final RepoService repoService;
@@ -35,37 +42,63 @@ public class RepoController {
     private final ObjectMapper objectMapper;
 
     @PostMapping
+    @Operation(summary = "Create a new repository", description = "Create a new Git repository entry")
+    @ApiResponse(responseCode = "201", description = "Repository created successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid request data")
     public ResponseEntity<RepoResponse> createRepo(@Valid @RequestBody CreateRepoRequest request) {
         var response = repoService.createRepo(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping
+    @Operation(summary = "List all repositories", description = "Get a list of all registered repositories")
+    @ApiResponse(responseCode = "200", description = "List of repositories")
     public ResponseEntity<List<RepoResponse>> listRepos() {
         return ResponseEntity.ok(repoService.listRepos());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<RepoResponse> getRepo(@PathVariable UUID id) {
+    @Operation(summary = "Get repository by ID", description = "Retrieve details of a specific repository")
+    @ApiResponse(responseCode = "200", description = "Repository found")
+    @ApiResponse(responseCode = "404", description = "Repository not found")
+    public ResponseEntity<RepoResponse> getRepo(
+            @Parameter(description = "Repository ID", required = true)
+            @PathVariable UUID id) {
         return ResponseEntity.ok(repoService.getRepo(id));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteRepo(@PathVariable UUID id) {
+    @Operation(summary = "Delete repository", description = "Remove a repository and all associated data")
+    @ApiResponse(responseCode = "204", description = "Repository deleted successfully")
+    @ApiResponse(responseCode = "404", description = "Repository not found")
+    public ResponseEntity<Void> deleteRepo(
+            @Parameter(description = "Repository ID", required = true)
+            @PathVariable UUID id) {
         repoService.deleteRepo(id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/sync")
-    public ResponseEntity<SyncResponse> syncRepo(@PathVariable UUID id) {
+    @Operation(summary = "Sync repository", description = "Synchronize repository commits with local or remote source")
+    @ApiResponse(responseCode = "200", description = "Sync completed")
+    @ApiResponse(responseCode = "404", description = "Repository not found")
+    public ResponseEntity<SyncResponse> syncRepo(
+            @Parameter(description = "Repository ID", required = true)
+            @PathVariable UUID id) {
         var response = repoService.syncRepo(id);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}/commits")
+    @Operation(summary = "List commits", description = "Get paginated list of commits for a repository")
+    @ApiResponse(responseCode = "200", description = "List of commits")
+    @ApiResponse(responseCode = "404", description = "Repository not found")
     public ResponseEntity<List<CommitResponse>> listCommits(
+            @Parameter(description = "Repository ID", required = true)
             @PathVariable UUID id,
+            @Parameter(description = "Page number (0-indexed)")
             @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size")
             @RequestParam(defaultValue = "50") int size) {
         var commits = commitEntryRepository
                 .findByRepoIdOrderByAuthoredAtDesc(id, PageRequest.of(page, size));

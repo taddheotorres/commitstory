@@ -14,6 +14,7 @@ import com.thiz.commitstory.service.generator.TemplateStoryGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class StoryService {
@@ -35,14 +37,17 @@ public class StoryService {
 
     @Transactional
     public StoryResponse createStory(UUID repoId, CreateStoryRequest request) {
+        log.info("Creating story for repository: {} (mode: {})", repoId, request.mode());
         var repo = repoService.findRepo(repoId);
         var mode = parseMode(request.mode());
 
         var commits = fetchCommitsInRange(repoId, request.startSha(), request.endSha());
         if (commits.isEmpty()) {
+            log.warn("No commits found for range in repository: {}", repoId);
             throw new IllegalArgumentException("No commits found for the given range");
         }
 
+        log.debug("Generating story with {} commits in {} mode", commits.size(), mode);
         var generator = resolveGenerator(mode);
         var options = new LinkedHashMap<String, String>();
         options.put("title", request.title() != null ? request.title() : repo.getName());
@@ -64,21 +69,35 @@ public class StoryService {
         try {
             story.setMetadata(objectMapper.writeValueAsString(metadata));
         } catch (JsonProcessingException e) {
+            log.error("Error serializing story metadata", e);
             story.setMetadata("{}");
         }
         story = storyRepository.save(story);
+        log.info("Story created successfully: {} (ID: {})", story.getTitle(), story.getId());
 
         return toResponse(story);
     }
 
     public StoryResponse getStory(UUID id) {
+        log.debug("Fetching story: {}", id);
         var story = storyRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Story", id));
+                .orElseThrow(() -> {
+                    log.warn("Story not found: {}", id);
+                    return new ResourceNotFoundException("Story", id);
+                });
         return toResponse(story);
     }
 
     public List<StoryResponse> listStories(UUID repoId) {
+        log.debug("Listing stories for repository: {}", repoId);
         return storyRepository.findByRepoIdOrderByCreatedAtDesc(repoId).stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    public List<StoryResponse> listAllStories() {
+        log.debug("Listing all stories");
+        return storyRepository.findAll().stream()
                 .map(this::toResponse)
                 .toList();
     }
@@ -115,6 +134,7 @@ public class StoryService {
         try {
             return StoryMode.valueOf(mode.toUpperCase());
         } catch (IllegalArgumentException e) {
+            log.error("Invalid story mode: {}", mode);
             throw new IllegalArgumentException("Invalid mode: " + mode + ". Valid values: TEMPLATE, LLM");
         }
     }
