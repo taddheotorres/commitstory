@@ -8,12 +8,14 @@ import com.thiz.commitstory.dto.TimelinePoint;
 import com.thiz.commitstory.entity.CommitEntry;
 import com.thiz.commitstory.repository.CommitEntryRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AnalyticsService {
@@ -22,8 +24,10 @@ public class AnalyticsService {
     private final ObjectMapper objectMapper;
 
     public AnalyticsSummary summary(UUID repoId) {
+        log.debug("Computing summary analytics for repository: {}", repoId);
         var commits = commitEntryRepository.findByRepoIdOrderByAuthoredAtAsc(repoId);
         if (commits.isEmpty()) {
+            log.debug("No commits found for repository: {}", repoId);
             return new AnalyticsSummary(0, 0, null, null, 0, List.of(), List.of());
         }
 
