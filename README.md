@@ -2,7 +2,7 @@
 
 Transform Git commit history into coherent narrative stories. A full-stack analytics dashboard that tells the visual story of a Git repository.
 
-**Live demo:** https://prismgit-production.up.railway.app/
+**Live demo:** https://prismgit-production.up.railway.app
 
 ## Stack
 
