@@ -10,7 +10,6 @@ import org.springframework.web.servlet.resource.ResourceResolver;
 import org.springframework.web.servlet.resource.ResourceResolverChain;
 
 import jakarta.servlet.http.HttpServletRequest;
-import java.io.IOException;
 import java.util.List;
 
 @Configuration
@@ -18,17 +17,14 @@ public class SpaConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.setOrder(Integer.MIN_VALUE + 1)
-            .addResourceHandler("/**")
+        registry.addResourceHandler("/**")
             .addResourceLocations("classpath:/static/")
             .resourceChain(false)
             .addResolver(new ResourceResolver() {
                 @Override
                 public Resource resolveResource(HttpServletRequest request, String requestPath,
                         List<? extends Resource> locations, ResourceResolverChain chain) {
-                    // Only handle paths without dots (non-file paths)
-                    // and that don't start with /api/
-                    if (requestPath.contains(".") || requestPath.startsWith("api/")) {
+                    if (requestPath.contains(".")) {
                         return chain.resolveResource(request, requestPath, locations);
                     }
                     
@@ -37,7 +33,6 @@ public class SpaConfig implements WebMvcConfigurer {
                         return resource;
                     }
                     
-                    // Fall back to index.html for SPA routes
                     try {
                         return new ClassPathResource("/static/index.html");
                     } catch (Exception e) {
