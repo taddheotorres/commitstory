@@ -21,3 +21,6 @@ docker/.env
 # OS
 .DS_Store
 Thumbs.db
+
+# opencode internal config
+.opencode/
