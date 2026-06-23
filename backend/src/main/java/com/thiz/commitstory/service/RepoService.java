@@ -64,7 +64,7 @@ public class RepoService {
         log.info("Syncing repository: {}", id);
         var repo = findRepo(id);
         var response = repoSyncService.sync(repo);
-        log.info("Repository synced successfully: {} (commits added: {})", id, response.commitsAdded());
+        log.info("Repository synced successfully: {} (commits imported: {})", id, response.commitsImported());
         return response;
     }
 
