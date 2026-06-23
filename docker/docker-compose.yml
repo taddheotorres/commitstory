@@ -2,13 +2,13 @@ services:
   db:
     image: postgres:17-alpine
     environment:
-      POSTGRES_DB: commitstory
-      POSTGRES_USER: commitstory
+      POSTGRES_DB: prismgit
+      POSTGRES_USER: prismgit
       POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U commitstory"]
+      test: ["CMD-SHELL", "pg_isready -U prismgit"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -19,7 +19,7 @@ services:
       dockerfile: Dockerfile
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/commitstory
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/prismgit
       DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
       GITHUB_TOKEN: ${GITHUB_TOKEN:-}
       LLM_API_KEY: ${LLM_API_KEY:-}

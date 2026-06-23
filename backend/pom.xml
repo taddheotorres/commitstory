@@ -12,9 +12,9 @@
     </parent>
 
     <groupId>com.thiz</groupId>
-    <artifactId>commitstory</artifactId>
+    <artifactId>prismgit</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>commitstory</name>
+    <name>prismgit</name>
     <description>Transform git commit history into narrative stories</description>
 
     <properties>

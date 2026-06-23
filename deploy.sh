@@ -1,5 +1,5 @@
 #!/bin/sh
-# deploy.sh — Deploy Commit Storyteller to Railway
+# deploy.sh — Deploy PrismGit to Railway
 # 1. Crea cuenta en https://railway.app
 # 2. railway login
 # 3. railway up
@@ -8,7 +8,7 @@ set -e
 
 PATH="$HOME/.railway/bin:$PATH"
 
-echo "=== Commit Storyteller — Deploy ==="
+echo "=== PrismGit — Deploy ==="
 
 # Check Railway CLI
 if ! command -v railway >/dev/null 2>&1; then

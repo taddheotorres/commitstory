@@ -1,8 +1,8 @@
-# commitstory
+# PrismGit
 
 Transform Git commit history into coherent narrative stories. A full-stack analytics dashboard that tells the visual story of a Git repository.
 
-**Live demo:** https://commitstory-production.up.railway.app/
+**Live demo:** https://prismgit-production.up.railway.app/
 
 ## Stack
 
@@ -28,9 +28,9 @@ Transform Git commit history into coherent narrative stories. A full-stack analy
 ## Structure
 
 ```
-commitstory/
+prismgit/
 ├── backend/                  # REST API + business logic
-│   └── src/main/java/com/thiz/commitstory/
+│   └── src/main/java/com/thiz/prismgit/
 │       ├── config/           # Spring configuration (SPA, OpenAPI, app)
 │       ├── controller/       # REST controllers (Repo, Analytics, Story)
 │       ├── dto/              # Data Transfer Objects
@@ -143,7 +143,7 @@ cd frontend && ng test
 The project auto-deploys from the `main` branch via Dockerfile (multi-stage: Angular build → Maven build → JRE runtime).
 
 ```bash
-railway up --service commitstory
+railway up --service prismgit
 ```
 
 ## License

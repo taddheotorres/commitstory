@@ -11,7 +11,7 @@ import { GitRepo, CreateRepoRequest } from '../../models/repo.model';
   imports: [CommonModule, RouterModule, FormsModule],
   template: `
     <div class="container">
-      <h1>CommitStory</h1>
+      <h1>PrismGit</h1>
       <p class="subtitle">Dashboard analítico que cuenta la historia visual de tus repos</p>
       <div class="card">
         <h2>Add Repository</h2>
