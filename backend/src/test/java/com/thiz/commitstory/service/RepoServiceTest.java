@@ -160,7 +160,7 @@ class RepoServiceTest {
         SyncResponse response = repoService.syncRepo(repoId);
 
         assertNotNull(response);
-        assertEquals(5, response.commitsAdded());
+        assertEquals(5, response.commitsImported());
         assertEquals("Synced 5 commits", response.message());
         verify(gitRepoRepository).findById(repoId);
         verify(repoSyncService).sync(repo);

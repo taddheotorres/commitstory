@@ -48,7 +48,7 @@ class StoryControllerTest {
     void setUp() {
         repoId = UUID.randomUUID();
         storyId = UUID.randomUUID();
-        createRequest = new CreateStoryRequest("Template", null, null);
+        createRequest = new CreateStoryRequest("Template", null, null, null);
         storyResponse = new StoryResponse(
                 storyId, repoId, "The Journey of This Repo", "## Chapter 1\nLots of commits...",
                 StoryMode.TEMPLATE, null, null, LocalDateTime.now()
@@ -74,7 +74,7 @@ class StoryControllerTest {
 
     @Test
     void should_return_400_when_create_story_with_invalid_data() throws Exception {
-        CreateStoryRequest invalidRequest = new CreateStoryRequest("", null, null);
+        CreateStoryRequest invalidRequest = new CreateStoryRequest("", null, null, null);
 
         mockMvc.perform(post("/api/repos/{repoId}/stories", repoId)
                 .contentType(MediaType.APPLICATION_JSON)

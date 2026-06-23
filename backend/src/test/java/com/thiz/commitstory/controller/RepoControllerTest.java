@@ -1,10 +1,10 @@
 package com.thiz.commitstory.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.thiz.commitstory.dto.CommitResponse;
 import com.thiz.commitstory.dto.CreateRepoRequest;
 import com.thiz.commitstory.dto.RepoResponse;
 import com.thiz.commitstory.dto.SyncResponse;
+import com.thiz.commitstory.entity.CommitEntry;
 import com.thiz.commitstory.entity.RepoProvider;
 import com.thiz.commitstory.exception.ResourceNotFoundException;
 import com.thiz.commitstory.repository.CommitEntryRepository;
@@ -175,9 +175,9 @@ class RepoControllerTest {
 
     @Test
     void should_list_commits_with_pagination() throws Exception {
-        CommitResponse commit = new CommitResponse(
-                UUID.randomUUID(), "abc123", "Alice", "alice@example.com",
-                LocalDateTime.now(), "feat: add feature", List.of("src/main.ts"), 10, 2
+        CommitEntry commit = new CommitEntry(
+                UUID.randomUUID(), null, "abc123", "Alice", "alice@example.com",
+                LocalDateTime.now(), "feat: add feature", "[\"src/main.ts\"]", 10, 2
         );
         var page = new PageImpl<>(List.of(commit), PageRequest.of(0, 50), 1);
         when(commitEntryRepository.findByRepoIdOrderByAuthoredAtDesc(eq(repoId), any(PageRequest.class)))

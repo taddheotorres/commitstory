@@ -40,7 +40,7 @@ class AnalyticsControllerTest {
     @Test
     void should_get_analytics_summary() throws Exception {
         AnalyticsSummary summary = new AnalyticsSummary(
-                10, 3, 5, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 31),
+                10, 3, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 31), 5,
                 List.of(), List.of()
         );
         when(analyticsService.summary(repoId)).thenReturn(summary);

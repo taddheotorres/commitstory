@@ -86,7 +86,7 @@ class StoryServiceTest {
 
     @Test
     void should_create_story_successfully() {
-        CreateStoryRequest request = new CreateStoryRequest("Template", null, null);
+        CreateStoryRequest request = new CreateStoryRequest("Template", null, null, null);
         when(repoService.findRepo(repoId)).thenReturn(repo);
         when(commitEntryRepository.findByRepoIdOrderByAuthoredAtAsc(repoId))
                 .thenReturn(List.of(commit1, commit2));
@@ -108,7 +108,7 @@ class StoryServiceTest {
 
     @Test
     void should_throw_error_when_no_commits_in_range() {
-        CreateStoryRequest request = new CreateStoryRequest("Template", "abc123", "xyz789");
+        CreateStoryRequest request = new CreateStoryRequest("Template", null, "abc123", "xyz789");
         when(repoService.findRepo(repoId)).thenReturn(repo);
         when(commitEntryRepository.findByRepoIdOrderByAuthoredAtAsc(repoId))
                 .thenReturn(List.of());
@@ -119,7 +119,7 @@ class StoryServiceTest {
 
     @Test
     void should_parse_mode_template() {
-        CreateStoryRequest request = new CreateStoryRequest("TEMPLATE", null, null);
+        CreateStoryRequest request = new CreateStoryRequest("TEMPLATE", null, null, null);
         when(repoService.findRepo(repoId)).thenReturn(repo);
         when(commitEntryRepository.findByRepoIdOrderByAuthoredAtAsc(repoId))
                 .thenReturn(List.of(commit1));
@@ -135,7 +135,7 @@ class StoryServiceTest {
 
     @Test
     void should_throw_error_on_invalid_mode() {
-        CreateStoryRequest request = new CreateStoryRequest("INVALID", null, null);
+        CreateStoryRequest request = new CreateStoryRequest("INVALID", null, null, null);
         when(repoService.findRepo(repoId)).thenReturn(repo);
         when(commitEntryRepository.findByRepoIdOrderByAuthoredAtAsc(repoId))
                 .thenReturn(List.of(commit1));
@@ -223,7 +223,7 @@ class StoryServiceTest {
 
     @Test
     void should_handle_json_processing_error() {
-        CreateStoryRequest request = new CreateStoryRequest("Template", null, null);
+        CreateStoryRequest request = new CreateStoryRequest("Template", null, null, null);
         when(repoService.findRepo(repoId)).thenReturn(repo);
         when(commitEntryRepository.findByRepoIdOrderByAuthoredAtAsc(repoId))
                 .thenReturn(List.of(commit1));
