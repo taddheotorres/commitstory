@@ -114,7 +114,7 @@ describe('DashboardComponent', () => {
 
   it('should sync repository', () => {
     component.repo = mockRepo;
-    apiService.syncRepo.and.returnValue(of({ commitsAdded: 5, message: 'Synced 5 commits' }));
+    apiService.syncRepo.and.returnValue(of({ commitsImported: 5, message: 'Synced 5 commits' }));
 
     component.sync();
 

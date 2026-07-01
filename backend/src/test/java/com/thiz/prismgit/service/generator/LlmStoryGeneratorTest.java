@@ -51,9 +51,9 @@ class LlmStoryGeneratorTest {
         repo.setId(repoId);
         repo.setName("test-repo");
 
-        commit1 = new CommitEntry(UUID.randomUUID(), repo, "abc123", "Alice", "alice@example.com",
+        commit1 = new CommitEntry(UUID.randomUUID(), repo, "abc1234", "Alice", "alice@example.com",
                 LocalDateTime.of(2024, 1, 1, 10, 0), "feat: add feature", "[\"src/main.ts\"]", 5, 1);
-        commit2 = new CommitEntry(UUID.randomUUID(), repo, "def456", "Bob", "bob@example.com",
+        commit2 = new CommitEntry(UUID.randomUUID(), repo, "def4567", "Bob", "bob@example.com",
                 LocalDateTime.of(2024, 1, 2, 14, 0), "fix: bug fix", "[\"src/bug.ts\"]", 2, 2);
 
         options = new LinkedHashMap<>();
@@ -185,8 +185,8 @@ class LlmStoryGeneratorTest {
         assertNotNull(result);
         assertTrue(result.contains("Commits"));
         assertTrue(result.contains("2"));
-        assertTrue(result.contains("abc123"));
-        assertTrue(result.contains("def456"));
+        assertTrue(result.contains("abc1234"));
+        assertTrue(result.contains("def4567"));
     }
 
     @Test

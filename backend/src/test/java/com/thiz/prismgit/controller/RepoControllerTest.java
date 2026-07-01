@@ -8,14 +8,18 @@ import com.thiz.prismgit.entity.CommitEntry;
 import com.thiz.prismgit.entity.RepoProvider;
 import com.thiz.prismgit.exception.ResourceNotFoundException;
 import com.thiz.prismgit.repository.CommitEntryRepository;
+import com.thiz.prismgit.security.JwtAuthenticationFilter;
 import com.thiz.prismgit.service.RepoService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -35,6 +39,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(RepoController.class)
+@AutoConfigureMockMvc(addFilters = false)
+@WithMockUser
 class RepoControllerTest {
 
     @Autowired
@@ -48,6 +54,9 @@ class RepoControllerTest {
 
     @MockitoBean
     private CommitEntryRepository commitEntryRepository;
+
+    @MockitoBean
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     private UUID repoId;
     private CreateRepoRequest createRequest;
@@ -167,7 +176,7 @@ class RepoControllerTest {
 
         mockMvc.perform(post("/api/repos/{id}/sync", repoId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.commitsAdded").value(5))
+                .andExpect(jsonPath("$.commitsImported").value(5))
                 .andExpect(jsonPath("$.message").value("Synced 5 commits"));
 
         verify(repoService).syncRepo(repoId);
@@ -196,7 +205,7 @@ class RepoControllerTest {
 
     @Test
     void should_list_commits_with_default_pagination() throws Exception {
-        var page = new PageImpl<>(List.of(), PageRequest.of(0, 50), 0);
+        Page<CommitEntry> page = new PageImpl<>(List.of(), PageRequest.of(0, 50), 0);
         when(commitEntryRepository.findByRepoIdOrderByAuthoredAtDesc(eq(repoId), any(PageRequest.class)))
                 .thenReturn(page);
 

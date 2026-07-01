@@ -27,7 +27,7 @@ describe('ApiService', () => {
     authorEmail: 'alice@example.com',
     authoredAt: new Date().toISOString(),
     message: 'feat: add feature',
-    files: ['src/main.ts'],
+    filesChanged: ['src/main.ts'],
     additions: 10,
     deletions: 2
   };
@@ -113,10 +113,10 @@ describe('ApiService', () => {
     });
 
     it('should sync repo', () => {
-      const syncResponse: SyncResponse = { commitsAdded: 5, message: 'Synced 5 commits' };
+      const syncResponse: SyncResponse = { commitsImported: 5, message: 'Synced 5 commits' };
 
       service.syncRepo('1').subscribe(response => {
-        expect(response.commitsAdded).toBe(5);
+        expect(response.commitsImported).toBe(5);
       });
 
       const req = httpMock.expectOne('/api/repos/1/sync');
@@ -225,9 +225,7 @@ describe('ApiService', () => {
     it('should create story', () => {
       const createRequest: CreateStoryRequest = {
         mode: 'TEMPLATE',
-        title: 'Test Story',
-        startSha: null,
-        endSha: null
+        title: 'Test Story'
       };
 
       service.createStory('1', createRequest).subscribe(story => {

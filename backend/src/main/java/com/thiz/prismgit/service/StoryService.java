@@ -8,6 +8,7 @@ import com.thiz.prismgit.entity.StoryMode;
 import com.thiz.prismgit.exception.ResourceNotFoundException;
 import com.thiz.prismgit.repository.CommitEntryRepository;
 import com.thiz.prismgit.repository.StoryRepository;
+import com.thiz.prismgit.security.SecurityUtil;
 import com.thiz.prismgit.service.generator.LlmStoryGenerator;
 import com.thiz.prismgit.service.generator.StoryGenerator;
 import com.thiz.prismgit.service.generator.TemplateStoryGenerator;
@@ -38,7 +39,7 @@ public class StoryService {
     @Transactional
     public StoryResponse createStory(UUID repoId, CreateStoryRequest request) {
         log.info("Creating story for repository: {} (mode: {})", repoId, request.mode());
-        var repo = repoService.findRepo(repoId);
+        var repo = repoService.findOwnedRepo(repoId);
         var mode = parseMode(request.mode());
 
         var commits = fetchCommitsInRange(repoId, request.startSha(), request.endSha());
@@ -66,6 +67,7 @@ public class StoryService {
         story.setMode(mode);
         story.setStartSha(request.startSha());
         story.setEndSha(request.endSha());
+        story.setOwnerId(SecurityUtil.requireCurrentUserId());
         try {
             story.setMetadata(objectMapper.writeValueAsString(metadata));
         } catch (JsonProcessingException e) {
@@ -80,7 +82,8 @@ public class StoryService {
 
     public StoryResponse getStory(UUID id) {
         log.debug("Fetching story: {}", id);
-        var story = storyRepository.findById(id)
+        var ownerId = SecurityUtil.requireCurrentUserId();
+        var story = storyRepository.findByIdAndOwnerId(id, ownerId)
                 .orElseThrow(() -> {
                     log.warn("Story not found: {}", id);
                     return new ResourceNotFoundException("Story", id);
@@ -90,6 +93,7 @@ public class StoryService {
 
     public List<StoryResponse> listStories(UUID repoId) {
         log.debug("Listing stories for repository: {}", repoId);
+        repoService.findOwnedRepo(repoId);
         return storyRepository.findByRepoIdOrderByCreatedAtDesc(repoId).stream()
                 .map(this::toResponse)
                 .toList();
@@ -97,7 +101,8 @@ public class StoryService {
 
     public List<StoryResponse> listAllStories() {
         log.debug("Listing all stories");
-        return storyRepository.findAll().stream()
+        var ownerId = SecurityUtil.requireCurrentUserId();
+        return storyRepository.findByOwnerIdOrderByCreatedAtDesc(ownerId).stream()
                 .map(this::toResponse)
                 .toList();
     }

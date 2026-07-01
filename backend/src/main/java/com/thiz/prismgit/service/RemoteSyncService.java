@@ -46,7 +46,7 @@ public class RemoteSyncService {
         var repoName = matcher.group(2);
 
         var headers = new HttpHeaders();
-        if (!githubToken.isBlank()) {
+        if (githubToken != null && !githubToken.isBlank()) {
             headers.setBearerAuth(githubToken);
         }
         headers.set("Accept", "application/vnd.github.v3+json");
@@ -113,7 +113,7 @@ public class RemoteSyncService {
     @SuppressWarnings("unchecked")
     private List<String> fetchCommitFiles(String owner, String repo, String sha) {
         var headers = new HttpHeaders();
-        if (!githubToken.isBlank()) {
+        if (githubToken != null && !githubToken.isBlank()) {
             headers.setBearerAuth(githubToken);
         }
         headers.set("Accept", "application/vnd.github.v3+json");

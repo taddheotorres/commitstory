@@ -28,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -56,6 +57,7 @@ class RemoteSyncServiceTest {
         repo.setId(repoId);
         repo.setName("test-repo");
         repo.setRemoteUrl("https://github.com/testuser/testrepo");
+        ReflectionTestUtils.setField(remoteSyncService, "githubToken", "test-token");
     }
 
     @Test
@@ -138,23 +140,23 @@ class RemoteSyncServiceTest {
 
         // First page with next link, second page without
         when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), any(HttpEntity.class),
-                eq(new ParameterizedTypeReference<List<Map<String, Object>>>() {})))
+                any(ParameterizedTypeReference.class)))
                 .thenAnswer(invocation -> {
                     String url = invocation.getArgument(0);
-                    if (url.contains("page=1")) {
-                        var response = new ResponseEntity<>(List.of(mockCommit), HttpStatus.OK);
-                        response.getHeaders().set("Link", "<next>; rel=\"next\"");
-                        return response;
-                    } else {
-                        return new ResponseEntity<>(List.of(), HttpStatus.OK);
+                    if (url.contains("per_page=100&page=1")) {
+                        var headers = new org.springframework.http.HttpHeaders();
+                        headers.set("Link", "<next>; rel=\"next\"");
+                        return new ResponseEntity<>(List.of(mockCommit), headers, HttpStatus.OK);
                     }
+                    return new ResponseEntity<>(List.of(), HttpStatus.OK);
                 });
 
         int imported = remoteSyncService.syncFromGitHub(repo);
 
         assertEquals(1, imported);
-        verify(restTemplate, times(2)).exchange(anyString(), eq(HttpMethod.GET), any(HttpEntity.class),
-                eq(new ParameterizedTypeReference<List<Map<String, Object>>>() {}));
+        verify(restTemplate, times(2)).exchange(
+                argThat((String url) -> url.contains("per_page=100")),
+                eq(HttpMethod.GET), any(HttpEntity.class), any(ParameterizedTypeReference.class));
     }
 
     @Test
@@ -168,7 +170,6 @@ class RemoteSyncServiceTest {
     void should_handle_github_url_with_git_extension() {
         repo.setRemoteUrl("https://github.com/testuser/testrepo.git");
 
-        when(commitEntryRepository.existsByRepoIdAndSha(any(), any())).thenReturn(false);
         when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), any(HttpEntity.class),
                 eq(new ParameterizedTypeReference<List<Map<String, Object>>>() {})))
                 .thenReturn(new ResponseEntity<>(List.of(), HttpStatus.OK));
@@ -182,7 +183,6 @@ class RemoteSyncServiceTest {
     void should_handle_ssh_github_url() {
         repo.setRemoteUrl("git@github.com:testuser/testrepo.git");
 
-        when(commitEntryRepository.existsByRepoIdAndSha(any(), any())).thenReturn(false);
         when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), any(HttpEntity.class),
                 eq(new ParameterizedTypeReference<List<Map<String, Object>>>() {})))
                 .thenReturn(new ResponseEntity<>(List.of(), HttpStatus.OK));

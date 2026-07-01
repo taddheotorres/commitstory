@@ -3,11 +3,14 @@ package com.thiz.prismgit.controller;
 import com.thiz.prismgit.dto.ActivityDistribution;
 import com.thiz.prismgit.dto.AnalyticsSummary;
 import com.thiz.prismgit.dto.TimelinePoint;
+import com.thiz.prismgit.security.JwtAuthenticationFilter;
 import com.thiz.prismgit.service.AnalyticsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -22,6 +25,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AnalyticsController.class)
+@AutoConfigureMockMvc(addFilters = false)
+@WithMockUser
 class AnalyticsControllerTest {
 
     @Autowired
@@ -29,6 +34,9 @@ class AnalyticsControllerTest {
 
     @MockitoBean
     private AnalyticsService analyticsService;
+
+    @MockitoBean
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     private UUID repoId;
 

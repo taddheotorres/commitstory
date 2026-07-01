@@ -1,5 +1,6 @@
 package com.thiz.prismgit.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thiz.prismgit.entity.CommitEntry;
 import com.thiz.prismgit.entity.GitRepo;
@@ -16,6 +17,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -23,6 +26,9 @@ class AnalyticsServiceTest {
 
     @Mock
     private CommitEntryRepository commitEntryRepository;
+
+    @Mock
+    private ObjectMapper objectMapper;
 
     @InjectMocks
     private AnalyticsService analyticsService;
@@ -54,8 +60,19 @@ class AnalyticsServiceTest {
     }
 
     @Test
-    void summary_success() {
+    void summary_success() throws Exception {
         when(commitEntryRepository.findByRepoIdOrderByAuthoredAtAsc(repoId)).thenReturn(List.of(c1, c2, c3));
+        when(objectMapper.readValue(any(String.class), any(TypeReference.class)))
+                .thenAnswer(inv -> {
+                    String json = inv.getArgument(0);
+                    if (json.contains("src/a.ts") && json.contains("src/b.ts"))
+                        return List.of("src/a.ts", "src/b.ts");
+                    if (json.contains("src/a.ts"))
+                        return List.of("src/a.ts");
+                    if (json.contains("README.md"))
+                        return List.of("README.md");
+                    return List.of();
+                });
         var s = analyticsService.summary(repoId);
         assertEquals(3, s.totalCommits());
         assertEquals(2, s.totalAuthors());

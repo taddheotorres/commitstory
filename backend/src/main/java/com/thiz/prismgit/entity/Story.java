@@ -53,6 +53,8 @@ public class Story {
     @Column(columnDefinition = "TEXT")
     private String metadata;
 
+    private UUID ownerId;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

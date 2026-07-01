@@ -5,12 +5,15 @@ import com.thiz.prismgit.dto.CreateStoryRequest;
 import com.thiz.prismgit.dto.StoryResponse;
 import com.thiz.prismgit.entity.StoryMode;
 import com.thiz.prismgit.exception.ResourceNotFoundException;
+import com.thiz.prismgit.security.JwtAuthenticationFilter;
 import com.thiz.prismgit.service.StoryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -28,6 +31,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(StoryController.class)
+@AutoConfigureMockMvc(addFilters = false)
+@WithMockUser
 class StoryControllerTest {
 
     @Autowired
@@ -38,6 +43,9 @@ class StoryControllerTest {
 
     @MockitoBean
     private StoryService storyService;
+
+    @MockitoBean
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     private UUID repoId;
     private UUID storyId;
@@ -131,7 +139,8 @@ class StoryControllerTest {
 
         mockMvc.perform(get("/api/stories"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(0));
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$").isEmpty());
 
         verify(storyService).listAllStories();
     }
